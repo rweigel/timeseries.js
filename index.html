@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<head>
+	<title>Timeseries.js</title>
+	<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+	<script src="util.js"></script>
+	<script src="timeseries.js"></script>
+	<script src="log.js"></script>
+	<script src="events.js"></script>
+  <style>
+    htm, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+    div.plotly-notifier {
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body>
+	<div id="plot0"/>
+</body>
+
+<script>
+const x = [1, 2, 3, 4, 5];
+const y = [16, 18, 17, 18, 16];
+
+plot(x, y)
+
+function plot(x, y, style, layout) {
+
+  if (!style) {
+    style = timeseries.defaults.style.lines;
+  }
+  if (!layout) {
+    layout = timeseries.defaults.layout;
+  }
+  if (layout.height === undefined) {
+    layout.height = util.viewportWH().height;
+  }
+
+  style = [{x: x, y: y, ...style}];
+
+  Plotly.newPlot('plot0', [style[0], style[0]], layout);
+  events.set('plot0')
+}
+
+
+function figure() {}
+
+function gca() {
+  return "plot0"
+}
+
+function set(id, layout) {
+  const domElement = document.getElementById(id)
+  Plotly.relayout(domElement, layout);
+}
+
+</script>
