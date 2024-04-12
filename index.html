@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <head>
 	<title>Timeseries.js</title>
-	<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
-	<script src="util.js"></script>
+  <script
+    type="text/javascript"
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script> 
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <script src="util.js"></script>
 	<script src="timeseries.js"></script>
 	<script src="log.js"></script>
 	<script src="events.js"></script>
@@ -27,9 +32,15 @@
 const x = [1, 2, 3, 4, 5];
 const y = [16, 18, 17, 18, 16];
 
-plot(x, y)
+layout = timeseries.defaults.layout;
+layout.xaxis.linecolor = 'black';
+layout.xaxis.mirror = true;
+layout.yaxis.linecolor = 'black';
+layout.yaxis.mirror = true;
 
-function plot(x, y, style, layout) {
+plot(x, y, null, layout)
+
+function plot(x, y, style, layout, config) {
 
   if (!style) {
     style = timeseries.defaults.style.lines;
@@ -40,21 +51,35 @@ function plot(x, y, style, layout) {
   if (layout.height === undefined) {
     layout.height = util.viewportWH().height;
   }
-
+  if (!config) {
+    config = timeseries.defaults.config;
+  }
   style = [{x: x, y: y, ...style}];
 
-  Plotly.newPlot('plot0', [style[0], style[0]], layout);
-  events.set('plot0')
+  Plotly.newPlot('plot0', style, layout, config);
+  if (config.staticPlot === false) {
+    events.set('plot0')
+  }
 }
 
 
-function figure() {}
+function figure () {}
 
-function gca() {
+function gca () {
   return "plot0"
 }
-
-function set(id, layout) {
+function keys (obj) {
+  return Object.keys(obj)
+}
+function toJSON (obj, indent) {
+  return JSON.stringify(obj, null, indent)
+}
+function get (id, key) {
+  const domElement = document.getElementById(id)
+  console.log(keys(domElement))
+  return domElement.layout[key]
+}
+function set (id, layout) {
   const domElement = document.getElementById(id)
   Plotly.relayout(domElement, layout);
 }

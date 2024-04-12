@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<head>
+	<title>Timeseries.js</title>
+  <script
+    type="text/javascript"
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script> 
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <script src="util.js"></script>
+	<script src="timeseries.js"></script>
+	<script src="log.js"></script>
+	<script src="events.js"></script>
+  <style>
+    htm, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+    div.plotly-notifier {
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body>
+	<div id="plot0"/>
+</body>
+
+<script>
+const x = [-2, 1, 2, 3, 4, 5];
+const y = [-2, 1, 2, 3, 4, 5];
+
+config = timeseries.textbook.config;
+
+function layout(x, y, layoutName) {
+  function last(array) {
+    return array[array.length - 1]
+  }
+  const layout_ = timeseries[layoutName].layout;
+  layout_.xaxis.range = [x[0]-1, last(x)+1]
+  layout_.yaxis.range = [y[0]-1, last(y)+1]
+  layout_.annotations[0].x = last(x)+0.25
+  layout_.annotations[0].y = -0.2
+  layout_.annotations[1].x = last(x)+0.25
+  layout_.annotations[2].x = 0.15
+  layout_.annotations[2].y = last(y)+0.25
+  layout_.annotations[3].y = last(y)+0.25
+
+  // axis lines
+  layout_.shapes =  [
+    {
+      type: 'line',
+      x0: x[0],
+      y0: 0,
+      x1: last(x)+0.25,
+      y1: 0,
+      line: {
+        color: 'black',
+        width: 1,
+        dash: 'solid'
+      }
+    },
+    {
+      type: 'line',
+      x0: 0,
+      y0: y[0],
+      x1: 0,
+      y1: last(y)+0.25,
+      line: {
+        color: 'black',
+        width: 1,
+        dash: 'solid'
+      }
+    }
+  ]
+  for (let i = 0; i < x.length; i++) {
+    layout_.annotations.push({
+      text: ' <br><br>' + x[i] + '<br>', // leading space is needed for <br> to apply.
+      x: x[i],
+      y: 0,
+      showarrow: false
+    })
+    layout_.shapes.push({
+      type: 'line',
+      x0: x[i],
+      y0: -0.05,
+      x1: x[i],
+      y1: 0.05,
+      line: {
+        color: 'black',
+        width: 1,
+        dash: 'solid'
+      }
+    })
+  }
+
+  for (let i = 0; i < y.length; i++) {
+    layout_.annotations.push({
+      text: y[i] + '     ',
+      yanchor: 'middle',
+      x: -0.05,
+      y: y[i],
+      showarrow: false
+    })
+    layout_.shapes.push({
+      type: 'line',
+      x0: -0.05,
+      y0: y[i],
+      x1: 0.05,
+      y1: y[i],
+      line: {
+        color: 'black',
+        width: 1,
+        dash: 'solid'
+      }
+    })
+  }
+  return layout_
+}
+
+plot(x, y, null, layout(x, y, 'textbook'))
+
+function plot(x, y, style, layout, config) {
+
+  if (!style) {
+    style = timeseries.defaults.style.lines;
+  }
+  if (!layout) {
+    layout = timeseries.defaults.layout;
+  }
+  if (layout.height === undefined) {
+    layout.height = util.viewportWH().height;
+  }
+  if (!config) {
+    config = timeseries.defaults.config;
+  }
+
+  data = [{x: [-2, -2], y: [-2, 5], name: 'name1', showlegend: true, ...style}];
+
+  data.push({x: x, y: y,name: 'name2', showlegend: true, ...style});
+
+  Plotly.newPlot(gcf(), data, layout, config)
+    .then(function() {
+      console.log("plotly.newPlot.then()")
+      const domElement = document.getElementById(gcf())
+  })
+
+  if (!config.staticPlot) {
+    events.set(gcf())
+  }
+}
+
+
+function figure() {}
+
+function gcf() {
+  return "plot0"
+}
+function gca() {
+  return "plot0"
+}
+function keys(obj) {
+  return Object.keys(obj)
+}
+function toJSON(obj, indent) {
+  return JSON.stringify(obj, null, indent)
+}
+function get (id, key) {
+  const domElement = document.getElementById(id)
+  console.log(keys(domElement))
+  return domElement.layout[key]
+}
+function set(id, layout) {
+  const domElement = document.getElementById(id)
+  Plotly.relayout(domElement, layout);
+}
+
+</script>

@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "json-schema-generator": "^2.0.6",
+    "jsonfile": "^6.1.0"
+  }
+}
