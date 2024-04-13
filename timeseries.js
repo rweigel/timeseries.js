@@ -51,8 +51,9 @@ const timeseries = {
       lines: {
         mode: 'lines',
         line: {
+          color: 'blue',
           dash: 'solid',
-          width: 4
+          width: 2
         }
       }
     }
@@ -68,14 +69,26 @@ timeseries.textbook = {
     ...timeseries.defaults.layout,
     xaxis: {
       autorange: false,
-      ticks: true,
-      showticklabels: false,
       zeroline: false,
+
+      ticks: 'centered', // outside, inside, or centered (plotly does not have 'centered')
+      tickmode: 'linear',
+      ticklen: 5,
+      showticklabels: true,
+      tick0: -2,
+      dtick: 1,
+
+      showgrid: true,
+      gridcolor: '#eee',
+      griddash: 'solid',
+      gridwidth: 1,
       minor: {
         showgrid: true,
-        gridwidth: 1,
+        tickmode: 'linear',
+        dtick: 0.5,
         gridcolor: '#eee',
-        griddash: 'dot'
+        griddash: 'dot',
+        gridwidth: 1
       }
     },
     yaxis: {
@@ -83,44 +96,22 @@ timeseries.textbook = {
       ticks: true, // needed for minor grid to show
       showticklabels: false,
       zeroline: false,
+
+      tickmode: 'linear',
+      dtick: 1,
+      showgrid: false,
+      gridcolor: 'black', // '#eee'
+      griddash: 'solid',
+      gridwidth: 1,
       minor: {
-        showgrid: true,
+        showgrid: false,
+        tickmode: 'linear',
+        tick0: 1,
+        dtick: 0.25,
         gridwidth: 1,
         gridcolor: '#eee',
         griddash: 'dot'
       }
-    },
-    annotations: [
-      {
-        text: '$\\Large x$',
-        //height: 16, // Does not work
-        //valign: 'bottom', // Does not work
-        x: 1,
-        y: 0,
-        showarrow: false
-      },
-      {
-        text: '&#9654;',
-        height: 16, // Fixes an off-by-one pixel error
-        valign: 'top', // Fixes an off-by-one pixel error
-        x: 1,
-        y: 0,
-        showarrow: false
-      },
-      {
-        text: '$\\Large y$',
-        x: 0,
-        y: 1,
-        xref: 'x',
-        yref: 'y',
-        showarrow: false
-      },
-      {
-        text: '&#9650;',
-        x: 0,
-        y: 1,
-        showarrow: false
-      }
-    ]
+    }
   }
 }

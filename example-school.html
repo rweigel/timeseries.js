@@ -29,98 +29,219 @@
 </body>
 
 <script>
-const x = [-2, 1, 2, 3, 4, 5];
-const y = [-2, 1, 2, 3, 4, 5];
+const x = [-2, -1, 0, 1, 2, 3, 4, 5];
+const y = x;
 
-config = timeseries.textbook.config;
+plot(x, y)
 
-function layout(x, y, layoutName) {
-  function last(array) {
-    return array[array.length - 1]
-  }
-  const layout_ = timeseries[layoutName].layout;
-  layout_.xaxis.range = [x[0]-1, last(x)+1]
-  layout_.yaxis.range = [y[0]-1, last(y)+1]
-  layout_.annotations[0].x = last(x)+0.25
-  layout_.annotations[0].y = -0.2
-  layout_.annotations[1].x = last(x)+0.25
-  layout_.annotations[2].x = 0.15
-  layout_.annotations[2].y = last(y)+0.25
-  layout_.annotations[3].y = last(y)+0.25
-
-  // axis lines
-  layout_.shapes =  [
-    {
-      type: 'line',
-      x0: x[0],
-      y0: 0,
-      x1: last(x)+0.25,
-      y1: 0,
-      line: {
-        color: 'black',
-        width: 1,
-        dash: 'solid'
-      }
-    },
-    {
-      type: 'line',
-      x0: 0,
-      y0: y[0],
-      x1: 0,
-      y1: last(y)+0.25,
-      line: {
-        color: 'black',
-        width: 1,
-        dash: 'solid'
-      }
-    }
-  ]
-  for (let i = 0; i < x.length; i++) {
-    layout_.annotations.push({
-      text: ' <br><br>' + x[i] + '<br>', // leading space is needed for <br> to apply.
-      x: x[i],
-      y: 0,
-      showarrow: false
-    })
-    layout_.shapes.push({
-      type: 'line',
-      x0: x[i],
-      y0: -0.05,
-      x1: x[i],
-      y1: 0.05,
-      line: {
-        color: 'black',
-        width: 1,
-        dash: 'solid'
-      }
-    })
-  }
-
-  for (let i = 0; i < y.length; i++) {
-    layout_.annotations.push({
-      text: y[i] + '     ',
-      yanchor: 'middle',
-      x: -0.05,
-      y: y[i],
-      showarrow: false
-    })
-    layout_.shapes.push({
-      type: 'line',
-      x0: -0.05,
-      y0: y[i],
-      x1: 0.05,
-      y1: y[i],
-      line: {
-        color: 'black',
-        width: 1,
-        dash: 'solid'
-      }
-    })
-  }
-  return layout_
+function last(array) {
+  return array[array.length - 1]
 }
 
-plot(x, y, null, layout(x, y, 'textbook'))
+function setAxisEndAnnotations(x, y, layout) {
+
+  // Arrow heads and axis labels
+  const annotations =
+    [
+      {
+        text: '$\\Large x$',
+        x: last(x)+0.25,
+        y: -0.2,
+        showarrow: false
+      },
+      {
+        x: last(x)+0.25,
+        y: 0,
+        text: '&#9654;',
+        height: 16, // Fixes an off-by-one pixel error
+        valign: 'top', // Fixes an off-by-one pixel error
+        showarrow: false
+      },
+      {
+        text: '$\\Large y$',
+        x: 0.15,
+        y: last(y)+0.25,
+        showarrow: false
+      },
+      {
+        text: '&#9650;',
+        x: 0,
+        y: last(y)+0.25,
+        showarrow: false
+      }
+    ]
+
+  layout.annotations = [...layout.annotations, ...annotations]
+}
+
+function CoordinateToPixelRatio(id, direction) {
+  let domElement = document.getElementById(id);
+  var axis = domElement._fullLayout[direction + 'axis'];
+  let offset = 0;
+  if (direction == 'x') {
+    offset = domElement._fullLayout.margin.l;
+  }
+  if (direction == 'y') {
+    offset = domElement._fullLayout.margin.t;
+  }
+  const c2pRatio = (axis.c2p(axis.range[0]) + offset) / (axis.c2p(last(axis.range)) + offset);
+  return c2pRatio
+}
+
+function setTicks(id, x, y, layout) {
+
+  if (!setTicks.layoutOriginal) {
+    setTicks.layoutOriginal = JSON.parse(JSON.stringify(layout))
+  }
+
+  let ticks = setTicks.layoutOriginal.xaxis.ticks
+  if (ticks !== layout.xaxis.ticks) {
+    ticks = layout.xaxis.ticks
+  }
+  layout.xaxis.ticks = '' // Disable Plotly's ticks
+
+  let showticklabels = setTicks.layoutOriginal.xaxis.showticklabels
+  if (showticklabels !== layout.xaxis.showticklabels) {
+    showticklabels = layout.xaxis.showticklabels
+  }
+  layout.xaxis.showticklabels = false // Disable Plotly's ticklabels
+
+  if (ticks === '' && showticklabels === false) return
+
+  let c2pRatioX = CoordinateToPixelRatio(id, 'x')
+
+  let bottom = 0;
+  if (ticks === 'outside') {
+    bottom = -c2pRatioX*layout.xaxis.ticklen;
+  }
+  if (ticks === 'inside') {
+    bottom = 0;
+  }
+  if (ticks === 'centered') {
+    bottom = -c2pRatioX*layout.xaxis.ticklen/2;
+  }
+
+  for (let i = 0; i < x.length; i++) {
+    if (x[i] === 0) continue
+
+    if (showticklabels !== false) {
+      layout.annotations.push({
+        text: x[i], // leading space is needed for <br> to apply.
+        x: x[i] < 0 ? x[i] - c2pRatioX : x[i],
+        y: bottom,
+        xanchor: "center",
+        yanchor: "top",
+        showarrow: false
+      })
+    }
+
+    if (ticks !== '') {
+      layout.shapes.push({
+        type: 'line',
+        x0: x[i],
+        y0: bottom,
+        x1: x[i],
+        y1: bottom + c2pRatioX*(layout.xaxis.ticklen),
+        line: {
+          color: 'black',
+          width: 1,
+          dash: 'solid'
+        }
+      })
+    }
+  }
+
+}
+
+function axisLines(x, y, layout) {
+
+  const axisTraces = []
+  axisTraces.push({
+    x: [x[0], last(x)+0.25],
+    y: [0, 0],
+    showlegend: false,
+    mode: 'lines',
+    line: {
+      color: 'black',
+      width: 1,
+      dash: 'solid'
+    }
+  })
+  axisTraces.push({
+    x: [0, 0],
+    y: [y[0], last(y)+0.25],
+    showlegend: false,
+    mode: 'lines',
+    line: {
+      color: 'black',
+      width: 1,
+      dash: 'solid'
+    }
+  })
+
+  return axisTraces
+}
+
+function gridLines(x, y, layout) {
+
+  if (!gridLines.layoutOriginal) {
+    gridLines.layoutOriginal = JSON.parse(JSON.stringify(layout))
+  }
+
+  const gridTraces = []
+  let xgrid = gridLines.layoutOriginal.xaxis.showgrid !== false ||
+              gridLines.layoutOriginal.xaxis.minor.showgrid !== false
+
+  if (xgrid === false) return gridTraces
+
+  if (gridLines.layoutOriginal.xaxis.showgrid === true) {
+    layout.xaxis.showgrid = false;
+  }
+  if (gridLines.layoutOriginal.xaxis.minor.showgrid === true) {
+    layout.xaxis.minor.showgrid = false;
+  }
+
+  for (let i = 0; i < x.length; i++) {
+
+    if (x[i] !== 0 && gridLines.layoutOriginal.xaxis.showgrid === true) {
+      //console.log("major: ", x[i])
+      gridTraces.push({
+        x: [x[i], x[i]],
+        y: [y[0], y[y.length-1]],
+        showlegend: false,
+        mode: 'lines',
+        line: {
+          color: layout.xaxis.gridcolor,
+          width: layout.xaxis.gridwidth,
+          dash: layout.xaxis.griddash
+        }
+      })
+    }
+
+    if (gridLines.layoutOriginal.xaxis.minor.showgrid === false) {
+      continue
+    }
+
+    xg = x[i] + layout.xaxis.minor.dtick
+    while (xg < x[i+1]) {
+      //console.log("minor: ", xg)
+      gridTraces.push({
+        x: [xg, xg],
+        y: [y[0], y[y.length-1]],
+        showlegend: false,
+        mode: 'lines',
+        line: {
+          color: layout.xaxis.minor.gridcolor,
+          width: layout.xaxis.minor.gridwidth,
+          dash: layout.xaxis.minor.griddash
+        }
+      })
+      xg += layout.xaxis.minor.dtick
+    }
+  }
+
+  return gridTraces
+}
 
 function plot(x, y, style, layout, config) {
 
@@ -128,30 +249,51 @@ function plot(x, y, style, layout, config) {
     style = timeseries.defaults.style.lines;
   }
   if (!layout) {
-    layout = timeseries.defaults.layout;
+    layout = timeseries.textbook.layout;
   }
+  if (!config) {
+    config = timeseries.textbook.config;
+  }
+
   if (layout.height === undefined) {
     layout.height = util.viewportWH().height;
   }
-  if (!config) {
-    config = timeseries.defaults.config;
+  if (layout.annotations === undefined) {
+    layout.annotations = []
+  }
+  if (layout.shapes === undefined) {
+    layout.shapes = []
   }
 
-  data = [{x: [-2, -2], y: [-2, 5], name: 'name1', showlegend: true, ...style}];
+  //setTicks(x, y, layout)
+  setAxisEndAnnotations(x, y, layout)
 
-  data.push({x: x, y: y,name: 'name2', showlegend: true, ...style});
+  layout.xaxis.range = [x[0]-1, last(x)+1]
+  layout.yaxis.range = [y[0]-1, last(y)+1]
+
+  data = [];
+
+  gridTraces = gridLines(x, y, layout)
+  if (gridTraces.length > 0) data = [...data, ...gridTraces];
+
+  axisTraces = axisLines(x, y, layout)
+  if (axisTraces.length > 0) data = [...data, ...axisTraces];
+
+  data.push({x: [-2, 5], y: [-2, 5], name: 'name1', showlegend: false, ...style})
 
   Plotly.newPlot(gcf(), data, layout, config)
     .then(function() {
+      console.log(CoordinateToPixelRatio(gcf(), 'x'))
+      setTicks(gcf(), x, y, layout)
+      let domElement = document.getElementById(gcf());
+      Plotly.relayout(domElement, layout);
       console.log("plotly.newPlot.then()")
-      const domElement = document.getElementById(gcf())
   })
 
   if (!config.staticPlot) {
     events.set(gcf())
   }
 }
-
 
 function figure() {}
 
