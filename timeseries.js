@@ -33,12 +33,6 @@ const timeseries = {
         color: 'black',
         family: 'Times New Roman'
       },
-      xaxis: {
-        autorange: true
-      },
-      yaxis: {
-        autorange: true
-      },
       legend: {
         y: 0.5,
         x: 1,
@@ -68,23 +62,29 @@ timeseries.textbook = {
   layout: {
     ...timeseries.defaults.layout,
     xaxis: {
-      autorange: false,
-      zeroline: false,
+      autorange: true,
 
-      ticks: 'centered', // outside, inside, or centered (plotly does not have 'centered')
-      tickmode: 'linear',
+      zeroline: true,
+
+      showline: true, // bottom line
+      mirror: 'ticks', // ( true | "ticks" | false | "all" | "allticks" )
+
+      ticks: 'centered', // ( "" | "outside" | "inside" | "centered" ) (plotly does not have 'centered')
       ticklen: 5,
       showticklabels: true,
-      tick0: -2,
-      dtick: 1,
+
+      //tickmode: 'auto',
+      //tick0: -2,
+      //dtick: 1,
 
       showgrid: true,
       gridcolor: '#eee',
       griddash: 'solid',
       gridwidth: 1,
+
       minor: {
         showgrid: true,
-        tickmode: 'linear',
+        tickmode: 'auto',
         dtick: 0.5,
         gridcolor: '#eee',
         griddash: 'dot',
@@ -92,10 +92,10 @@ timeseries.textbook = {
       }
     },
     yaxis: {
-      autorange: false,
+      autorange: true,
       ticks: true, // needed for minor grid to show
-      showticklabels: false,
-      zeroline: false,
+      showticklabels: true,
+      zeroline: true,
 
       tickmode: 'linear',
       dtick: 1,
