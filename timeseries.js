@@ -57,22 +57,29 @@ const timeseries = {
 timeseries.textbook = {
   config: {
     ...timeseries.defaults.config,
-    staticPlot: false
+    staticPlot: false,
+    _keepOriginalLayout: true
   },
   layout: {
     ...timeseries.defaults.layout,
     xaxis: {
       autorange: true,
 
-      zeroline: true,
+      zeroline: false,
 
-      showline: true, // bottom line
+      showline: true, // bottom line assoc
       mirror: 'ticks', // ( true | "ticks" | false | "all" | "allticks" )
 
       ticks: 'centered', // ( "" | "outside" | "inside" | "centered" ) (plotly does not have 'centered')
-      ticklen: 5,
-      showticklabels: true,
+      ticklen: 6,
+      tickwidth: 1,
+      tickcolor: 'black',
+      tickfont: {
+        size: 16,
+        color: 'black'
+      },
 
+      showticklabels: true,
       //tickmode: 'auto',
       //tick0: -2,
       //dtick: 1,
@@ -90,28 +97,7 @@ timeseries.textbook = {
         griddash: 'dot',
         gridwidth: 1
       }
-    },
-    yaxis: {
-      autorange: true,
-      ticks: true, // needed for minor grid to show
-      showticklabels: true,
-      zeroline: true,
-
-      tickmode: 'linear',
-      dtick: 1,
-      showgrid: false,
-      gridcolor: 'black', // '#eee'
-      griddash: 'solid',
-      gridwidth: 1,
-      minor: {
-        showgrid: false,
-        tickmode: 'linear',
-        tick0: 1,
-        dtick: 0.25,
-        gridwidth: 1,
-        gridcolor: '#eee',
-        griddash: 'dot'
-      }
     }
   }
 }
+timeseries.textbook.layout.yaxis = timeseries.textbook.layout.xaxis

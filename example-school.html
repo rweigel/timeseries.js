@@ -29,16 +29,46 @@
 </body>
 
 <script>
-const x = [-2, -1, 0, 1, 2, 3, 4, 5];
-const y = x;
-
-plot(x, y)
+const x = [0, 1, 2, 3, 4, 5];
+const y = [0, 1, 2, 3, 4, 5];
+const style = {name: 'name1', showlegend: false};
+plot(x, y, style)
 
 function last(array) {
   return array[array.length - 1]
 }
 
-function axisEndAnnotations(id) {
+function getMajorTicks(id, direction) {
+  const axisName = direction + 'axis'
+  const domElement = document.getElementById(id);
+  const _axis = domElement._fullLayout[axisName];
+
+  let values = [];
+  for (let _val of _axis._vals) {
+    if (!_val.minor) values.push(_val.x)
+  }
+  return values
+}
+
+function getMinorTicks(id, direction) {
+  const axisName = direction + 'axis'
+  const domElement = document.getElementById(id);
+  const _axis = domElement._fullLayout[axisName];
+
+  let values = [];
+  for (let _val of _axis._vals) {
+    if (_val.minor) values.push(_val.x)
+  }
+  return values
+}
+
+function getRange(id, direction) {
+  const domElement = document.getElementById(id);
+  const axis = domElement._fullLayout[direction + 'axis'];
+  return axis.range
+}
+
+function axisEndAnnotations(id, layout) {
 
   let domElement = document.getElementById(id);
   var xaxis = domElement._fullLayout['xaxis'];
@@ -46,170 +76,213 @@ function axisEndAnnotations(id) {
   var yaxis = domElement._fullLayout['yaxis'];
   let yrange = yaxis.range
 
+  console.log(last(xrange))
+  console.log(last(getMinorTicks(id, 'x')))
   // Arrow heads and axis labels
   return annotations =
     [
       {
         text: '$\\Large x$',
-        x: 5.2,
-        y: -0.2,
+        x: last(getMinorTicks(id, 'x')),
+        y: -0.3,
         showarrow: false
       },
       {
-        x: 5.4,
+        text: '', // Needed or else space between end and ax value set below.
+        x: last(xrange),
         y: 0,
+        ax: last(getMinorTicks(id, 'x')),
+        ay: 0,
+
         xref: 'x',
         yref: 'y',
         axref: 'x',
         ayref: 'y',
-        ax: 0,
-        ay: 0,
-        xshift: 0, // why needed?
+
         arrowwidth: 1,
-        arrowsize: 3,
+        arrowsize: 2,
+        arrowhead: 3,
         standoff: 0,
         arrowwidth: 1.1,
         arrowcolor: 'black',
         borderpad: 0,
         startstandoff: 0,
-        //height: 16, // Fixes an off-by-one pixel error
-        //valign: 'top', // Fixes an off-by-one pixel error
         showarrow: true
       },
       {
         text: '$\\Large y$',
-        x: 0.15,
-        y: last(yrange),
+        x: 0.2,
+        y: last(getMinorTicks(id, 'y')),
         showarrow: false
       },
       {
-        text: '&#9650;',
+        text: '', // Needed or else space between end and ay value set below.
         x: 0,
         y: last(yrange),
-        showarrow: false
+        ax: 0,
+        ay: last(getMinorTicks(id, 'y')),
+        xref: 'x',
+        yref: 'y',
+        axref: 'x',
+        ayref: 'y',
+        arrowwidth: 1,
+        arrowsize: 2,
+        arrowhead: 3,
+        standoff: 0,
+        arrowwidth: 1.1,
+        arrowcolor: 'black',
+        borderpad: 0,
+        startstandoff: 0,
+        showarrow: true
       }
     ]
-
-  //layout.annotations = [...layout.annotations, ...annotations]
 }
 
-function CoordinateToPixelRatio(id, direction) {
-  let domElement = document.getElementById(id);
-  var axis = domElement._fullLayout[direction + 'axis'];
-  let offset = 0;
-  if (direction == 'x') {
-    offset = domElement._fullLayout.margin.l;
+function axisTicksAndLabels(id, layout, direction) {
+
+  if (!direction) {
+    const [annotationsx, shapesx] = axisTicksAndLabels(id, layout, 'x')
+    const [annotationsy, shapesy] = axisTicksAndLabels(id, layout, 'y')
+    return [[...annotationsx, ...annotationsy], [...shapesx, ...shapesy]]
   }
-  if (direction == 'y') {
-    offset = domElement._fullLayout.margin.t;
+
+  const axisName = direction + 'axis'
+  const domElement = document.getElementById(id);
+  const _axis = domElement._fullLayout[axisName];
+
+  const ticks = layout[axisName].ticks
+  const showticklabels = layout[axisName].showticklabels
+
+  const annotations = []
+  const shapes = []
+
+  if (ticks === '' && showticklabels === false) {
+    log(`ticks = ${ticks}, showticklabels = ${showticklabels}. Returning.`, 'axisTicksAndLabels')
+    return [annotations, shapes]
   }
-  const c2pRatio = (axis.c2p(axis.range[0]) + offset) / (axis.c2p(last(axis.range)) + offset);
-  return c2pRatio
-}
 
-function axisTicksAndLabels(id, layout) {
-
-  let domElement = document.getElementById(id);
-  var xaxis = domElement._fullLayout['xaxis'];
-  let xrange = xaxis.range
-  console.log(xaxis)
-  //return
-  //let ticks = layout.xaxis.ticks
-  //layout.xaxis.ticks = '' // Disable Plotly's ticks
-
-  //let showticklabels = layout.xaxis.showticklabels
-  //layout.xaxis.showticklabels = false // Disable Plotly's ticklabels
-
-  //if (ticks === '' && showticklabels === false) return
-
-  let c2pRatioX = CoordinateToPixelRatio(id, 'x')
-
-  if (!layout.annotations) {
-    layout.annotations = []
+  let c2pRatio = coordinateToPixelRatio(id, 'y')
+  if (direction === 'x') {
+  } else {
+    c2pRatio = coordinateToPixelRatio(id, 'y')
   }
-  if (!layout.shapes) {
-    layout.shapes = []
-  }
+
   let bottom = 0;
-
-  // Plotly uses half the tick length for the length of the tick. Why?
-  let len = c2pRatioX*(layout.xaxis.ticklen/2)
-  if (xaxis.ticks === 'outside') {
-    bottom = -c2pRatioX*xaxis.ticklen/2;
-  }
-  if (xaxis.ticks === 'inside') {
+  let len = c2pRatio*(layout[axisName].ticklen)
+  if (layout[axisName].ticks === 'inside') {
     bottom = 0;
   }
-  if (layout.xaxis.ticks === 'centered') {
-    bottom = -c2pRatioX*xaxis.ticklen/2;
-    len = 2*len
+  if (layout[axisName].ticks === 'outside') {
+    bottom = -c2pRatio*layout[axisName].ticklen;
+  }
+  if (layout[axisName].ticks === 'centered') {
+    bottom = -c2pRatio*layout[axisName].ticklen/2;
   }
 
-  let x = [];
-  console.log(xaxis._vals)
-  for (let val of xaxis._vals) {
-    if (!val.minor)
-      x.push(val.x)
-  }
-  console.log(x)
-  for (let i = 0; i < x.length; i++) {
+  const vals = getMajorTicks(id, direction)
+  console.log(vals)
+  for (let i = 0; i < vals.length; i++) {
 
-    if (x[i] === 0) continue
+    if (vals[i] === 0) continue
 
-    if (xaxis.showticklabels !== false) {
-      layout.annotations.push({
-        text: x[i],
-        x: x[i] < 0 ? x[i] - c2pRatioX : x[i],
-        y: bottom,
-        xanchor: "center",
-        yanchor: "top",
-        showarrow: false
-      })
+    if (layout[axisName].showticklabels !== false) {
+      if (direction === 'x') {
+        annotations.push({
+          text: vals[i],
+          x: vals[i] < 0 ? vals[i] - c2pRatio : vals[i],
+          y: bottom,
+          xanchor: "center",
+          yanchor: "top",
+          showarrow: false
+        })
+      } else {
+        annotations.push({
+          text: vals[i],
+          font: layout[axisName].font,
+          x: bottom,
+          y: vals[i] < 0 ? vals[i] - c2pRatio : vals[i],
+          xanchor: "right",
+          yanchor: "left",
+          showarrow: false
+        })
+      }
     }
 
-    if (xaxis.ticks !== '') {
-      layout.shapes.push({
-        type: 'line',
-        x0: x[i],
-        y0: bottom,
-        x1: x[i],
-        y1: bottom + len,
-        line: {
-          color: 'black',
-          width: 1,
-          dash: 'solid'
-        }
-      })
+    if (layout[axisName].ticks !== '') {
+      if (direction === 'x') {
+        shapes.push({
+          type: 'line',
+          x0: vals[i],
+          y0: bottom,
+          x1: vals[i],
+          y1: bottom + len,
+          line: {
+            color: layout[axisName].tickcolor,
+            width: layout[axisName].tickwidth,
+            dash: 'solid'
+          }
+        })
+      } else {
+        shapes.push({
+          type: 'line',
+          x0: bottom,
+          y0: vals[i],
+          x1: bottom + len,
+          y1: vals[i],
+          line: {
+            color: 'black',
+            width: layout[axisName].tickwidth,
+            dash: 'solid'
+          }
+        })
+      }
     }
   }
 
+  return [annotations, shapes]
 }
 
-function zeroLines(id,range) {
+function zeroLines(id, direction) {
+
+  direction = 'y'
+  const range = getRange(id, direction)
+  log("range = " + range, 'zeroLines')
 
   const axisTraces = []
-  axisTraces.push({
-    x: [range[0], last(range)],
-    y: [0, 0],
-    showlegend: false,
-    mode: 'lines',
-    line: {
-      color: 'black',
-      width: 1,
-      dash: 'solid'
-    }
-  })
+  if (direction === 'x') {
+    axisTraces.push({
+      x: [range[0], last(range)],
+      y: [0, 0],
+      showlegend: false,
+      mode: 'lines',
+      line: {
+        color: 'black',
+        width: 1,
+        dash: 'solid'
+      }
+    })
+  } else {
+    axisTraces.push({
+      x: [0, 0],
+      y: [range[0], last(range)],
+      showlegend: false,
+      mode: 'lines',
+      line: {
+        color: 'black',
+        width: 1,
+        dash: 'solid'
+      }
+    })
+  }
   return axisTraces
 }
 
 function gridLines(x, y, layout) {
 
   const gridTraces = []
-
+  console.log(layout)
   let showMajorGrid = layout.xaxis.showgrid
   let showMinorGrid = layout.xaxis.minor.showgrid
-  layout.xaxis.showgrid = false // Disable Plotly's gridlines
-  layout.xaxis.minor.showgrid = false // Disable Plotly's gridlines
   if (showMajorGrid === false && showMinorGrid === false) {
     return gridTraces
   }
@@ -256,6 +329,30 @@ function gridLines(x, y, layout) {
   return gridTraces
 }
 
+function coordinateToPixelRatio(id, direction) {
+  let domElement = document.getElementById(id);
+  var axis = domElement._fullLayout[direction + 'axis'];
+  let offset = 0;
+  let c2pRatio = 0;
+
+  log(`axis.c2p(axis.range[0]) = ${axis.c2p(axis.range[0])}`, 'coordinateToPixelRatio')
+  log(`axis.c2p(last(axis.range)) = ${axis.c2p(last(axis.range))}`, 'coordinateToPixelRatio')
+  if (direction === 'x') {
+    offset = domElement._fullLayout.margin.l;
+    c2pRatio = (axis.c2p(axis.range[0]) + offset) / (axis.c2p(last(axis.range)) + offset);
+  }
+  if (direction === 'y') {
+    offset = domElement._fullLayout.margin.t;
+    const dPixels = axis.c2p(axis.range[0]) - axis.c2p(last(axis.range))
+    const dValues = last(axis.range) - axis.range[0];
+    c2pRatio = dValues / dPixels
+  }
+  //const c2pRatio = (axis.c2p(last(axis.range)) + offset) / (axis.c2p(axis.range[0]) + offset);
+  log(`direction = ${direction}, c2pRatio = ${c2pRatio}, offset = ${offset}`, 'coordinateToPixelRatio')
+
+  return c2pRatio
+}
+
 function arange(start, step, step) {
   if (step === undefined) {
     return [...Array(start).keys()]
@@ -272,6 +369,8 @@ function arange(start, step, step) {
 
 function plot(x, y, style, layout, config) {
 
+  log('Called.','plot')
+
   if (!config) {
     config = timeseries.textbook.config;
   }
@@ -284,54 +383,58 @@ function plot(x, y, style, layout, config) {
   if (layout.height === undefined) {
     layout.height = util.viewportWH().height;
   }
-  if (layout.annotations === undefined) {
-    layout.annotations = []
-  }
-  if (layout.shapes === undefined) {
-    layout.shapes = []
-  }
 
-  data = [{x: [-2, 5], y: [-2, 5], name: 'name1', showlegend: false, ...style}]
+  data = [{x: x, y: y, ...style}]
 
-
+  log('Calling Plotly.newPlot().','plot')
   Plotly.newPlot(gcf(), data, layout, config)
-    .then(function() {
+    .then(function(domElement) {
+      log("Plotly.newPlot.then()",'plot')
 
-      console.log("plotly.newPlot.then()")
+      layoutOriginal = JSON.parse(JSON.stringify(layout))
 
-      let domElement = document.getElementById(gcf());
+      if (config._keepOriginalLayout === false) {
+        const layoutMods = {
+          xaxis: {
+            zeroline: false,
+            showgrid: false,
+            showline: false,
+            ticks: '',
+            showticklabels: false,
+            minor: {
+              showgrid: false
+            }
+          }
+        }
+        layoutMods.yaxis = layoutMods.xaxis;
+
+        layout = {...layout, ...layoutMods}
+        Plotly.relayout(gcf(), layout)
+      }
 
       // Number of traces before annotation traces are added
       let nTraces = domElement.data.length 
 
-      var axis = domElement._fullLayout['xaxis'];
-      let range = axis.range
-      console.log("range = ", range)
-
       // We don't use Plotly's zeroline because it will extend past the axis
       // arrow annotation. We add the zero lines after Plotly.newPlot() is
       // called because we need the axes ranges.
-      if (layout.yaxis.zeroline === true) {
-        yzeroline = true;
-      }
-      layout.yaxis.zeroline = false // Disable Plotly's zeroline
-
-      if (yzeroline) {
-        zeroLines = zeroLines(gcf(), range)
-        Plotly.addTraces(gcf(), zeroLines)
-      }
-      Plotly.relayout(domElement, layout);
+      //zeroLines = zeroLines(gcf(), layoutOriginal)
+      //Plotly.addTraces(gcf(), zeroLines)
 
       // Need to set after newPlot() because range is needed.
-      layout.annotations = axisEndAnnotations(gcf())
-      Plotly.relayout(domElement, layout);
+      endAnnotations = axisEndAnnotations(gcf())
 
-      // Need to set ticks and labels after Plotly.newPlot so that
+      // Need to set ticks and labels after Plotly.newPlot() so that
       // the coordinate to pixel ratios can be calculated.
-      axisTicksAndLabels(gcf(), layout)
+      const [labelAnnotations, tickShapes] = axisTicksAndLabels(gcf(), layoutOriginal)
+      console.log(labelAnnotations)
+      layout = {}
+      layout.annotations = [...endAnnotations, ...labelAnnotations]
+      layout.shapes = tickShapes
+      Plotly.relayout(gcf(), layout)
 
-      gridTraces = gridLines(x, y, layout)
-      Plotly.addTraces(gcf(), gridTraces)
+      //gridTraces = gridLines(x, y, layoutOriginal)
+      //Plotly.addTraces(gcf(), gridTraces)
 
       // Move first trace to end so that it is behind the gridlines
       // https://plotly.com/javascript/plotlyjs-function-reference/
