@@ -58,7 +58,8 @@ timeseries.textbook = {
   config: {
     ...timeseries.defaults.config,
     staticPlot: false,
-    _keepOriginalLayout: true
+    _keepOriginalLayout: false,
+    _useOriginalGridLines: false
   },
   layout: {
     ...timeseries.defaults.layout,
@@ -70,8 +71,8 @@ timeseries.textbook = {
       showline: true, // bottom line assoc
       mirror: 'ticks', // ( true | "ticks" | false | "all" | "allticks" )
 
-      ticks: 'centered', // ( "" | "outside" | "inside" | "centered" ) (plotly does not have 'centered')
-      ticklen: 6,
+      ticks: 'outside', // ( "" | "outside" | "inside" | "centered" ) (plotly does not have 'centered')
+      ticklen: 4,
       tickwidth: 1,
       tickcolor: 'black',
       tickfont: {
@@ -92,7 +93,6 @@ timeseries.textbook = {
       minor: {
         showgrid: true,
         tickmode: 'auto',
-        dtick: 0.5,
         gridcolor: '#eee',
         griddash: 'dot',
         gridwidth: 1

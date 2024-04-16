@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
-	<title>Timeseries.js</title>
+  <meta charset="utf-8">
+  <title>Timeseries.js</title>
   <script
     type="text/javascript"
     id="MathJax-script"
@@ -29,10 +30,13 @@
 </body>
 
 <script>
-const x = [0, 1, 2, 3, 4, 5];
-const y = [0, 1, 2, 3, 4, 5];
-const style = {name: 'name1', showlegend: false};
-plot(x, y, style)
+main()
+function main() {
+  const x = [-1, 0, 1, 2, 3, 4, 5];
+  const y = [-1, 0, 1, 2, 3, 4, 5];
+  const style = {name: 'name1', showlegend: false};
+  plot(x, y, style)
+}
 
 function last(array) {
   return array[array.length - 1]
@@ -68,30 +72,55 @@ function getRange(id, direction) {
   return axis.range
 }
 
-function axisEndAnnotations(id, layout) {
+function coordinateToPixelRatio(id, direction) {
+  let domElement = document.getElementById(id);
+  var axis = domElement._fullLayout[direction + 'axis'];
+  let offset = 0;
+  let c2pRatio = 0;
+
+  log(`axis.range[0] = ${axis.range[0]}`, 'coordinateToPixelRatio')
+  log(`last(axis.range) = ${last(axis.range)}`, 'coordinateToPixelRatio')
+  log(`axis.c2p(axis.range[0]) = ${axis.c2p(axis.range[0])}`, 'coordinateToPixelRatio')
+  log(`axis.c2p(last(axis.range)) = ${axis.c2p(last(axis.range))}`, 'coordinateToPixelRatio')
+  const dPixels = axis.c2p(last(axis.range)) - axis.c2p(axis.range[0])
+  const dValues = last(axis.range) - axis.range[0];
+  log(`dValues = ${dValues}`, 'coordinateToPixelRatio')
+  log(`dPixels = ${dPixels}`, 'coordinateToPixelRatio')
+  if (direction === 'x') {
+    offset = domElement._fullLayout.margin.l;
+    //c2pRatio = (axis.c2p(axis.range[0]) + offset) / (axis.c2p(last(axis.range)) + offset);
+    c2pRatio = dValues / dPixels
+  }
+  if (direction === 'y') {
+    //offset = domElement._fullLayout.margin.t;
+    c2pRatio = -dValues / dPixels
+  }
+  //const c2pRatio = (axis.c2p(last(axis.range)) + offset) / (axis.c2p(axis.range[0]) + offset);
+  log(`direction = ${direction}, c2pRatio = ${c2pRatio}, offset = ${offset}`, 'coordinateToPixelRatio')
+
+  return c2pRatio
+}
+
+function axisAnnotations(id, dataRange) {
 
   let domElement = document.getElementById(id);
-  var xaxis = domElement._fullLayout['xaxis'];
-  let xrange = xaxis.range
-  var yaxis = domElement._fullLayout['yaxis'];
-  let yrange = yaxis.range
+  let xrange = domElement._fullLayout['xaxis'].range;
+  let yrange = domElement._fullLayout['yaxis'].range;
 
-  console.log(last(xrange))
-  console.log(last(getMinorTicks(id, 'x')))
   // Arrow heads and axis labels
   return annotations =
     [
       {
         text: '$\\Large x$',
         x: last(getMinorTicks(id, 'x')),
-        y: -0.3,
-        showarrow: false
+        y: -coordinateToPixelRatio(id, 'y')*16,
+        showarrow: false,
       },
       {
         text: '', // Needed or else space between end and ax value set below.
-        x: last(xrange),
+        x: last(getMinorTicks(id, 'x')),
         y: 0,
-        ax: last(getMinorTicks(id, 'x')),
+        ax: xrange[0] < 0 && dataRange.x[0] >= 0 ? 0 : dataRange.x[0],
         ay: 0,
 
         xref: 'x',
@@ -111,16 +140,16 @@ function axisEndAnnotations(id, layout) {
       },
       {
         text: '$\\Large y$',
-        x: 0.2,
+        x: coordinateToPixelRatio(id, 'x')*16,
         y: last(getMinorTicks(id, 'y')),
         showarrow: false
       },
       {
         text: '', // Needed or else space between end and ay value set below.
         x: 0,
-        y: last(yrange),
+        y: last(getMinorTicks(id, 'y')),
         ax: 0,
-        ay: last(getMinorTicks(id, 'y')),
+        ay: yrange[0] < 0 && dataRange.y[0] >= 0 ? 0 : dataRange.y[0],
         xref: 'x',
         yref: 'y',
         axref: 'x',
@@ -180,7 +209,6 @@ function axisTicksAndLabels(id, layout, direction) {
   }
 
   const vals = getMajorTicks(id, direction)
-  console.log(vals)
   for (let i = 0; i < vals.length; i++) {
 
     if (vals[i] === 0) continue
@@ -212,10 +240,14 @@ function axisTicksAndLabels(id, layout, direction) {
       if (direction === 'x') {
         shapes.push({
           type: 'line',
-          x0: vals[i],
-          y0: bottom,
-          x1: vals[i],
-          y1: bottom + len,
+          x0: 0,
+          y0: -layout[axisName].ticklen/2,
+          x1: 0,
+          y1: layout[axisName].ticklen/2,
+          xanchor: vals[i],
+          yanchor: 0,
+          xsizemode: 'pixel',
+          ysizemode: 'pixel',
           line: {
             color: layout[axisName].tickcolor,
             width: layout[axisName].tickwidth,
@@ -225,10 +257,14 @@ function axisTicksAndLabels(id, layout, direction) {
       } else {
         shapes.push({
           type: 'line',
-          x0: bottom,
-          y0: vals[i],
-          x1: bottom + len,
-          y1: vals[i],
+          x0: -layout[axisName].ticklen/2,
+          y0: 0,
+          x1: layout[axisName].ticklen/2,
+          y1: 0,
+          xanchor: 0,
+          yanchor: vals[i],
+          xsizemode: 'pixel',
+          ysizemode: 'pixel',
           line: {
             color: 'black',
             width: layout[axisName].tickwidth,
@@ -242,115 +278,106 @@ function axisTicksAndLabels(id, layout, direction) {
   return [annotations, shapes]
 }
 
-function zeroLines(id, direction) {
+function gridLines(id, dataRange, layout, direction) {
 
-  direction = 'y'
-  const range = getRange(id, direction)
-  log("range = " + range, 'zeroLines')
-
-  const axisTraces = []
-  if (direction === 'x') {
-    axisTraces.push({
-      x: [range[0], last(range)],
-      y: [0, 0],
-      showlegend: false,
-      mode: 'lines',
-      line: {
-        color: 'black',
-        width: 1,
-        dash: 'solid'
-      }
-    })
-  } else {
-    axisTraces.push({
-      x: [0, 0],
-      y: [range[0], last(range)],
-      showlegend: false,
-      mode: 'lines',
-      line: {
-        color: 'black',
-        width: 1,
-        dash: 'solid'
-      }
-    })
+  if (!direction) {
+    const gridTracesx = gridLines(id, dataRange, layout, 'x')
+    const gridTracesy = gridLines(id, dataRange, layout, 'y')
+    return [...gridTracesx, ...gridTracesy]
   }
-  return axisTraces
-}
 
-function gridLines(x, y, layout) {
-
+  const axisName = direction + 'axis'
   const gridTraces = []
-  console.log(layout)
-  let showMajorGrid = layout.xaxis.showgrid
-  let showMinorGrid = layout.xaxis.minor.showgrid
+  let showMajorGrid = layout[axisName].showgrid
+  let showMinorGrid = layout[axisName].minor.showgrid
   if (showMajorGrid === false && showMinorGrid === false) {
     return gridTraces
   }
 
-  for (let i = 0; i < x.length; i++) {
+  let xMajor = getMajorTicks(id, 'x');
+  let yMajor = getMajorTicks(id, 'y');
+  let xMinor = getMinorTicks(id, 'x');
+  let yMinor = getMinorTicks(id, 'y');
+  const minX = dataRange.x[0]
+  const maxX = dataRange.x[1]
+  const minY = dataRange.y[0]
+  const maxY = dataRange.y[1]
 
-    if (x[i] !== 0 && showMajorGrid === true) {
-      //console.log("major: ", x[i])
-      gridTraces.push({
-        x: [x[i], x[i]],
-        y: [y[0], y[y.length-1]],
-        showlegend: false,
-        mode: 'lines',
-        line: {
-          color: layout.xaxis.gridcolor,
-          width: layout.xaxis.gridwidth,
-          dash: layout.xaxis.griddash
-        }
-      })
+  if (showMajorGrid) {
+    let attribs = {
+      showlegend: false,
+      mode: 'lines',
+      hoverinfo: 'skip',
+      line: {
+        color: layout[axisName].gridcolor,
+        width: layout[axisName].gridwidth,
+        dash: layout[axisName].griddash
+      }
     }
-
-    if (showMinorGrid === false) {
-      continue
-    }
-
-    xg = x[i] + layout.xaxis.minor.dtick
-    while (xg < x[i+1]) {
-      //console.log("minor: ", xg)
-      gridTraces.push({
-        x: [xg, xg],
-        y: [y[0], y[y.length-1]],
-        showlegend: false,
-        mode: 'lines',
-        line: {
-          color: layout.xaxis.minor.gridcolor,
-          width: layout.xaxis.minor.gridwidth,
-          dash: layout.xaxis.minor.griddash
+    if (direction === 'x') {
+      for (let i = 0; i < xMajor.length; i++) {
+        if (xMajor[i] !== 0 && xMajor[i] >= minX && xMajor[i] <= maxX) {
+          //console.log("major: ", xMajor[i])
+          gridTraces.push({
+            x: [xMajor[i], xMajor[i]],
+            y: [minY, maxY],
+            ...attribs
+          })
         }
-      })
-      xg += layout.xaxis.minor.dtick
+      }
+    }
+    if (direction === 'y') {
+      for (let i = 0; i < yMajor.length; i++) {
+        if (yMajor[i] !== 0 && yMajor[i] >= minY && yMajor[i] <= maxY) {
+          //console.log("major: ", yMajor[i])
+          gridTraces.push({
+            x: [minX, maxX],
+            y: [yMajor[i], yMajor[i]],
+            ...attribs
+          })
+        }
+      }
+    }
+  }
+
+  if (showMinorGrid) {
+    let attribs = {
+      showlegend: false,
+      mode: 'lines',
+      hoverinfo: 'skip',
+      line: {
+        color: layout[axisName].minor.gridcolor,
+        width: layout[axisName].minor.gridwidth,
+        dash: layout[axisName].minor.griddash
+      }
+    }
+    if (direction === 'x') {
+      for (let i = 0; i < xMinor.length; i++) {
+        if (xMinor[i] !== 0 && xMinor[i] >= minX && xMinor[i] <= maxX) {
+          //console.log("minor: ", xMinor[i])
+          gridTraces.push({
+            x: [xMinor[i], xMinor[i]],
+            y: [minY, maxY],
+            ...attribs
+          })
+        }
+      }
+    }
+    if (direction === 'y') {
+      for (let i = 0; i < yMinor.length; i++) {
+        if (yMinor[i] !== 0 && yMinor[i] >= minY && yMinor[i] <= maxY) {
+          //console.log("minor: ", yMinor[i])
+          gridTraces.push({
+            x: [minY, maxY],
+            y: [yMinor[i], yMinor[i]],
+            ...attribs
+          })
+        }
+      }
     }
   }
 
   return gridTraces
-}
-
-function coordinateToPixelRatio(id, direction) {
-  let domElement = document.getElementById(id);
-  var axis = domElement._fullLayout[direction + 'axis'];
-  let offset = 0;
-  let c2pRatio = 0;
-
-  log(`axis.c2p(axis.range[0]) = ${axis.c2p(axis.range[0])}`, 'coordinateToPixelRatio')
-  log(`axis.c2p(last(axis.range)) = ${axis.c2p(last(axis.range))}`, 'coordinateToPixelRatio')
-  if (direction === 'x') {
-    offset = domElement._fullLayout.margin.l;
-    c2pRatio = (axis.c2p(axis.range[0]) + offset) / (axis.c2p(last(axis.range)) + offset);
-  }
-  if (direction === 'y') {
-    offset = domElement._fullLayout.margin.t;
-    const dPixels = axis.c2p(axis.range[0]) - axis.c2p(last(axis.range))
-    const dValues = last(axis.range) - axis.range[0];
-    c2pRatio = dValues / dPixels
-  }
-  //const c2pRatio = (axis.c2p(last(axis.range)) + offset) / (axis.c2p(axis.range[0]) + offset);
-  log(`direction = ${direction}, c2pRatio = ${c2pRatio}, offset = ${offset}`, 'coordinateToPixelRatio')
-
-  return c2pRatio
 }
 
 function arange(start, step, step) {
@@ -391,26 +418,8 @@ function plot(x, y, style, layout, config) {
     .then(function(domElement) {
       log("Plotly.newPlot.then()",'plot')
 
-      layoutOriginal = JSON.parse(JSON.stringify(layout))
-
-      if (config._keepOriginalLayout === false) {
-        const layoutMods = {
-          xaxis: {
-            zeroline: false,
-            showgrid: false,
-            showline: false,
-            ticks: '',
-            showticklabels: false,
-            minor: {
-              showgrid: false
-            }
-          }
-        }
-        layoutMods.yaxis = layoutMods.xaxis;
-
-        layout = {...layout, ...layoutMods}
-        Plotly.relayout(gcf(), layout)
-      }
+      log('fullLayout after initial render:', 'plot')
+      log(domElement._fullLayout,'plot')
 
       // Number of traces before annotation traces are added
       let nTraces = domElement.data.length 
@@ -421,20 +430,44 @@ function plot(x, y, style, layout, config) {
       //zeroLines = zeroLines(gcf(), layoutOriginal)
       //Plotly.addTraces(gcf(), zeroLines)
 
+      const dataRange = {
+        x: [Math.min(...x), Math.max(...x)],
+        y: [Math.min(...y), Math.max(...y)]
+      }
+
+      if (config._useOriginalGridLines === false) {
+        const gridTraces = gridLines(gcf(), dataRange, layout)
+        Plotly.addTraces(gcf(), gridTraces)
+      }
+
       // Need to set after newPlot() because range is needed.
-      endAnnotations = axisEndAnnotations(gcf())
+      const endAnnotations = axisAnnotations(gcf(), dataRange)
 
       // Need to set ticks and labels after Plotly.newPlot() so that
       // the coordinate to pixel ratios can be calculated.
-      const [labelAnnotations, tickShapes] = axisTicksAndLabels(gcf(), layoutOriginal)
-      console.log(labelAnnotations)
+      const [labelAnnotations, tickShapes] = axisTicksAndLabels(gcf(), layout)
+
       layout = {}
       layout.annotations = [...endAnnotations, ...labelAnnotations]
       layout.shapes = tickShapes
-      Plotly.relayout(gcf(), layout)
 
-      //gridTraces = gridLines(x, y, layoutOriginal)
-      //Plotly.addTraces(gcf(), gridTraces)
+      if (config._keepOriginalLayout === false) {
+        const layoutMods = {
+          xaxis: {
+            zeroline: false,
+            showgrid: config._useOriginalGridLines,
+            showline: false,
+            ticks: '',
+            showticklabels: false,
+            minor: {
+              showgrid: config._useOriginalGridLines
+            }
+          }
+        }
+        layoutMods.yaxis = layoutMods.xaxis;
+        layout = {...layout, ...layoutMods}
+      }
+      Plotly.relayout(gcf(), layout)
 
       // Move first trace to end so that it is behind the gridlines
       // https://plotly.com/javascript/plotlyjs-function-reference/

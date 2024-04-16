@@ -8,7 +8,7 @@ events.set = function (id) {
   const domElement = document.getElementById(id)
   for (const event of Object.keys(events)) {
     if (event === 'set') { continue }
-    log(`Adding eventListener to '${id}': ` + event, 'events')
+    //log(`Adding eventListener to '${id}': ` + event, 'events')
     const eventName = 'plotly_' + event
     domElement.on(eventName, function (data) {
       if (data) {
