@@ -17,13 +17,17 @@
 	<script src="lib/annotation.js"></script>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
+      margin: 0px;
+      padding-left: 3px;
     }
     div.plotly-notifier {
       visibility: hidden;
+    }
+    div.js-plotly-plot {
+      margin-top: 4px;
+      margin-right: 4px;
+      display: inline-block;
+      border: 2px solid #000;
     }
   </style>
 </head>
@@ -32,8 +36,8 @@
 </body>
 
 <script>
-let x = [-1, 0, 1, 2, 3, 4, 5];
-let y = [-1, 0, 1, 2, 3, 4, 5];
+let x = [-1, 0, 1, 2, 3, 4, 100];
+let y = [-1, 0, 1, 2, 3, 4, 100];
 const style = {
   type: 'scatter',
   mode: 'lines+markers',
@@ -44,9 +48,9 @@ const style = {
   }
 };
 plotjs.plot(x, y, style)
-plotjs.figure()
-x = [0, 1, 2, 3, 4, 5];
-y = [0, 1, 2, 3, 4, 5];
-plotjs.plot(x, y, style)
-plotjs.close(plotjs.gcf())
+//plotjs.figure()
+x = [0, 10, 20, 30, 40, 50];
+y = [0, 10, 20, 30, 40, 50];
+//plotjs.plot(x, y, style)
+//plotjs.close(plotjs.gcf())
 </script>
