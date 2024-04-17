@@ -1,22 +1,58 @@
 const fs = require('fs')
+const path = require('path')
 const jsonfile = require('jsonfile')
 const generateSchema = require('json-schema-generator')
 
-const filePath = './plotly-v2-11b662.json' // Replace with your file path
+let filePath = './plotly-v2.json'
 
-jsonfile.readFile(filePath, function (err, obj) {
-  if (err) console.error(err)
-  else {
-    const schemaPlotly = obj.schema.config
-    fs.writeFileSync('config-plotly-schema.json', JSON.stringify(schemaPlotly, null, 2))
+const url = 'https://api.plotly.com/v2/plot-schema?sha1'
 
-    const defaults = buildDefaults(schemaPlotly)
-    fs.writeFileSync('config-defaults.js', 'const config =\n' + JSON.stringify(defaults, null, 2))
+fetch(url)
+  .then(response => response.json())
+  .then(data => writeSchema(data))
+  .catch(error => console.error('Error:', error))
 
-    const schemaJSON = buildSchema(schemaPlotly)
-    fs.writeFileSync('config-json-schema.json', JSON.stringify(schemaJSON, null, 2))
+function writeSchema (data) {
+  const fileDir = path.join(__dirname, data.sha1.slice(0, 6))
+  if (!fs.existsSync(fileDir)) {
+    fs.mkdirSync(fileDir)
   }
-})
+  filePath = path.join(fileDir, 'plotly-v2.json')
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+  splitSchema(filePath)
+}
+
+function splitSchema (filePath) {
+  const fileDir = path.dirname(filePath)
+  jsonfile.readFile(filePath, function (err, obj) {
+    if (err) console.error(err)
+    else {
+      const config = obj.schema.config
+      let outFile = path.join(fileDir, 'config-plotly-schema.json')
+      fs.writeFileSync(outFile, JSON.stringify(config, null, 2))
+
+      const configDefaults = buildDefaults(config)
+      outFile = path.join(fileDir, 'config-defaults.js')
+      fs.writeFileSync(outFile, 'const config =\n' + JSON.stringify(configDefaults, null, 2))
+
+      const configJSON = buildSchema(config, 'config')
+      outFile = path.join(fileDir, 'config-json-schema.json')
+      fs.writeFileSync(outFile, JSON.stringify(configJSON, null, 2))
+
+      const layout = obj.schema.layout.layoutAttributes
+      outFile = path.join(fileDir, 'layout-plotly-schema.json')
+      fs.writeFileSync(outFile, JSON.stringify(layout, null, 2))
+
+      const layoutDefaults = buildDefaults(layout)
+      outFile = path.join(fileDir, 'layout-defaults.js')
+      fs.writeFileSync(outFile, 'const layout =\n' + JSON.stringify(layoutDefaults, null, 2))
+
+      const layoutJSON = buildSchema(layout, 'layout')
+      outFile = path.join(fileDir, 'layout-json-schema.json')
+      fs.writeFileSync(outFile, JSON.stringify(layoutJSON, null, 2))
+    }
+  })
+}
 
 function buildDefaults (obj) {
   const defaults = {}
@@ -26,12 +62,12 @@ function buildDefaults (obj) {
   return defaults
 }
 
-function buildSchema (obj) {
+function buildSchema (obj, title) {
   const schema = {
     $id: 'https:// https://api.plot.ly/v2/plotly-schema.json',
     $schema: 'https://json-schema.org/draft/2020-12/schema'
   }
-  schema.title = 'config'
+  schema.title = title
   schema.properties = {}
   for (const key of Object.keys(obj)) {
     const type_ = determineType(obj[key])

@@ -4,10 +4,9 @@
   <meta charset="utf-8">
   <title>plotjs</title>
   <script
-    type="text/javascript"
     id="MathJax-script"
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-  </script> 
+  </script>
   <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 	<script src="lib/plotjs.js"></script>
   <script src="lib/util.js"></script>
@@ -49,5 +48,5 @@ plotjs.figure()
 x = [0, 1, 2, 3, 4, 5];
 y = [0, 1, 2, 3, 4, 5];
 plotjs.plot(x, y, style)
-//plotjs.close(plotjs.gcf())
+plotjs.close(plotjs.gcf())
 </script>
