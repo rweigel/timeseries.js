@@ -39,9 +39,9 @@ function buildSchema (obj) {
       schema.properties[key] = {}
       schema.properties[key].description = obj[key].description
       schema.properties[key].type = type_
-      //console.log(`${key} = ${JSON.stringify(type_)}`)
+      //plotjs.log(`${key} = ${JSON.stringify(type_)}`)
     } else {
-      //console.log(`?${key} ${JSON.stringify(obj[key])}`)
+      //plotjs.log(`?${key} ${JSON.stringify(obj[key])}`)
     }
   }
   return schema

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<head>
+  <!--https://github.com/plotly/plotly.py/issues/4118#issuecomment-2018199233-->
+  <meta charset="utf-8">
+  <title>plotjs</title>
+  <script
+    type="text/javascript"
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script> 
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+	<script src="lib/plotjs.js"></script>
+  <script src="lib/util.js"></script>
+	<script src="lib/config.js"></script>
+	<script src="lib/log.js"></script>
+	<script src="lib/events.js"></script>
+	<script src="lib/math.js"></script>
+	<script src="lib/annotation.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+    div.plotly-notifier {
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body>
+</body>
+
+<script>
+let x = [-1, 0, 1, 2, 3, 4, 5];
+let y = [-1, 0, 1, 2, 3, 4, 5];
+const style = {
+  type: 'scatter',
+  mode: 'lines+markers',
+  name: 'name1',
+  showlegend: false,
+  marker: {
+    color: 'black'
+  }
+};
+plotjs.plot(x, y, style)
+plotjs.figure()
+x = [0, 1, 2, 3, 4, 5];
+y = [0, 1, 2, 3, 4, 5];
+plotjs.plot(x, y, style)
+//plotjs.close(plotjs.gcf())
+</script>
