@@ -36,8 +36,8 @@
 </body>
 
 <script>
-let x = [-1, 0, 1, 2, 3, 4, 100];
-let y = [-1, 0, 1, 2, 3, 4, 100];
+let x = [-1, 5];
+let y = [-1, 5];
 const style = {
   type: 'scatter',
   mode: 'lines+markers',
@@ -48,9 +48,9 @@ const style = {
   }
 };
 plotjs.plot(x, y, style)
-//plotjs.figure()
-x = [0, 10, 20, 30, 40, 50];
-y = [0, 10, 20, 30, 40, 50];
-//plotjs.plot(x, y, style)
+plotjs.figure()
+x = [0, 50];
+y = [0, 50];
+plotjs.plot(x, y, style)
 //plotjs.close(plotjs.gcf())
 </script>
