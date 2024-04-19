@@ -47,10 +47,66 @@ const style = {
     color: 'black'
   }
 };
-plotjs.plot(x, y, style)
+
+function setTitle(xaxis) {
+  layout.title.text = `_ticks = ${xaxis._ticks}, `
+  layout.title.text += `_ticklabelposition = ${xaxis._ticklabelposition}`
+}
+
+let layout = plotjs.config.textbook.layout
+
+layout.title.text = 'default'
+plotjs.plot(x, y, style, layout)
+
 plotjs.figure()
-x = [0, 50];
-y = [0, 50];
-plotjs.plot(x, y, style)
-//plotjs.close(plotjs.gcf())
+layout.xaxis._ticks = 'centered'
+layout.xaxis._ticklabelposition = 'outside'
+setTitle(layout.xaxis)
+plotjs.plot(x, y, style, layout)
+
+plotjs.figure()
+layout.xaxis._ticks = 'centered'
+layout.xaxis._ticklabelposition = 'inside'
+setTitle(layout.xaxis)
+plotjs.plot(x, y, style, layout)
+
+plotjs.figure()
+layout.xaxis._ticks = 'inside'
+layout.xaxis._ticklabelposition = 'inside'
+setTitle(layout.xaxis)
+plotjs.plot(x, y, style, layout)
+
+plotjs.figure()
+layout.xaxis._ticks = 'outside'
+layout.xaxis._ticklabelposition = 'outside'
+setTitle(layout.xaxis)
+plotjs.plot(x, y, style, layout)
+
+plotjs.figure()
+layout.xaxis._ticks = 'inside'
+layout.xaxis._ticklabelposition = 'outside'
+setTitle(layout.xaxis)
+plotjs.plot(x, y, style, layout)
+
+plotjs.figure()
+layout.xaxis._ticks = 'outside'
+layout.xaxis._ticklabelposition = 'inside'
+setTitle(layout.xaxis)
+plotjs.plot(x, y, style, layout)
+
+plotjs.figure()
+//layout.xaxis._ticks = ''
+//layout.xaxis._ticklabelposition = ''
+layout.xaxis._ticks = 'centered'
+layout.xaxis.showticklabels = false
+layout.title.text = 'showticklabels = false'
+plotjs.plot(x, y, style, layout)
+
+let label = layout._annotations.xaxis.label
+for (let position of ['inside', 'outside', 'after']) {
+  plotjs.figure()
+  label.position = position
+  layout.title.text = `position = ${position}`
+  plotjs.plot(x, y, style, layout)
+}
 </script>
