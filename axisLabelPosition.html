@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+  <!--https://github.com/plotly/plotly.py/issues/4118#issuecomment-2018199233-->
+  <meta charset="utf-8">
+  <title>plotjs</title>
+  <script
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+	<script src="lib/plotjs.js"></script>
+  <script src="lib/util.js"></script>
+	<script src="lib/config.js"></script>
+	<script src="lib/log.js"></script>
+	<script src="lib/events.js"></script>
+	<script src="lib/math.js"></script>
+	<script src="lib/annotation.js"></script>
+  <style>
+    html, body {
+      margin: 0px;
+      padding-left: 3px;
+    }
+    div.plotly-notifier {
+      visibility: hidden;
+    }
+    div.js-plotly-plot {
+      margin-top: 4px;
+      margin-right: 4px;
+      display: inline-block;
+      background-color: white;
+      border: 2px solid #000;
+    }
+  </style>
+</head>
+
+<body>
+</body>
+
+<script>
+let x = [0, 20];
+let y = [0, 20];
+const style = {
+  type: 'scatter',
+  mode: 'lines+markers',
+  name: 'name1',
+  showlegend: false,
+  marker: {
+    color: 'black'
+  }
+};
+
+let config = plotjs.config.textbook.config
+let layout = plotjs.config.textbook.layout
+let xlabel = layout._annotations.xaxis.label
+let ylabel = layout._annotations.yaxis.label
+for (let position of ['inside', 'outside', 'after']) {
+//for (let position of ['after']) {
+  plotjs.figure()
+  xlabel.position = position
+  ylabel.position = position
+  layout.title.text = `label.position = ${position}`
+  plotjs.plot(x, y, style, layout, config)
+}
+
+</script>

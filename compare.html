@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<head>
+  <!--https://github.com/plotly/plotly.py/issues/4118#issuecomment-2018199233-->
+  <meta charset="utf-8">
+  <title>plotjs</title>
+  <script
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+	<script src="lib/plotjs.js"></script>
+  <script src="lib/util.js"></script>
+	<script src="lib/config.js"></script>
+	<script src="lib/log.js"></script>
+	<script src="lib/events.js"></script>
+	<script src="lib/math.js"></script>
+	<script src="lib/annotation.js"></script>
+  <style>
+    html, body {
+      margin: 0px;
+      padding-left: 3px;
+    }
+    div.plotly-notifier {
+      visibility: hidden;
+    }
+    div.js-plotly-plot {
+      margin-top: 4px;
+      margin-right: 4px;
+      display: inline-block;
+      border: 2px solid #000;
+    }
+  </style>
+</head>
+
+<body>
+</body>
+
+<script>
+let x = [0, 10];
+let y = [0, 100];
+const style = {
+  type: 'scatter',
+  mode: 'lines+markers',
+  name: 'name1',
+  showlegend: false,
+  marker: {
+    color: 'black'
+  }
+};
+
+function setTitle(xaxis) {
+  layout.title.text = `_ticks = ${xaxis._ticks}, `
+  layout.title.text += `_ticklabelposition = ${xaxis._ticklabelposition}`
+}
+
+layout = { title: null }
+layout.title = 'Plotly default'
+plotjs.plot(x, y, style, layout, { _usePlotly: true })
+
+plotjs.figure()
+layout = { title: null }
+layout.title = 'PlotJS default'
+plotjs.plot(x, y, style, layout)
+
+
+</script>
