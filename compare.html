@@ -53,12 +53,23 @@ function setTitle(xaxis) {
   layout.title.text += `_ticklabelposition = ${xaxis._ticklabelposition}`
 }
 
-layout = { title: null }
+const layout = {
+  xaxis: {
+    title: {
+      text: 'x'
+    }
+  },
+  yaxis: {
+    title: {
+      text: 'y'
+    }
+  }
+}
+
 layout.title = 'Plotly default'
-plotjs.plot(x, y, style, layout, { _usePlotly: true })
+plotjs.plot(x, y, style, layout, { _usePlotlyOnly: true })
 
 plotjs.figure()
-layout = { title: null }
 layout.title = 'PlotJS default'
 plotjs.plot(x, y, style, layout)
 

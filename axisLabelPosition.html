@@ -49,17 +49,41 @@ const style = {
   }
 };
 
-let config = plotjs.config.textbook.config
-let layout = plotjs.config.textbook.layout
-let xlabel = layout._annotations.xaxis.label
-let ylabel = layout._annotations.yaxis.label
-for (let position of ['inside', 'outside', 'after']) {
-//for (let position of ['after']) {
+const layout = {
+  title: {
+    text: undefined
+  },
+  xaxis: {
+    title: {
+      text: 'x'
+    }
+  },
+  yaxis: {
+    title: {
+      text: 'y'
+    }
+  },
+  _annotations: {
+    xaxis: {
+      label: {
+        _position: undefined
+      }
+    },
+    yaxis: {
+      label: {
+        _position: undefined
+      }
+    }
+  }
+}
+
+for (let _position of ['inside', 'outside', 'after']) {
+//for (let _position of ['after']) {
   plotjs.figure()
-  xlabel.position = position
-  ylabel.position = position
-  layout.title.text = `label.position = ${position}`
-  plotjs.plot(x, y, style, layout, config)
+  layout._annotations.xaxis.label._position = _position
+  layout._annotations.yaxis.label._position = _position
+  layout.title.text = `label._position = ${_position}`
+  plotjs.plot(x, y, style, layout)
 }
 
 </script>
