@@ -37,8 +37,8 @@
 </body>
 
 <script>
-let x = [0, 20];
-let y = [0, 20];
+let x = [-5, 20];
+let y = [-5, 20];
 const style = {
   type: 'scatter',
   mode: 'lines+markers',
@@ -55,22 +55,22 @@ const layout = {
   },
   xaxis: {
     title: {
-      text: 'x'
+      text: undefined
     }
   },
   yaxis: {
     title: {
-      text: 'y'
+      text: undefined
     }
   },
   _annotations: {
     xaxis: {
-      label: {
+      arrowlabel: {
         _position: undefined
       }
     },
     yaxis: {
-      label: {
+      arrowlabel: {
         _position: undefined
       }
     }
@@ -78,11 +78,46 @@ const layout = {
 }
 
 for (let _position of ['inside', 'outside', 'after']) {
-//for (let _position of ['after']) {
   plotjs.figure()
-  layout._annotations.xaxis.label._position = _position
-  layout._annotations.yaxis.label._position = _position
-  layout.title.text = `label._position = ${_position}`
+  layout.title.text = `arrowlabel._position = ${_position}`
+  layout.xaxis.title.text = 'x'
+  layout.yaxis.title.text = 'y'
+  layout._annotations.xaxis.arrowlabel._position = _position
+  layout._annotations.yaxis.arrowlabel._position = _position
+  plotjs.plot(x, y, style, layout)
+
+  plotjs.figure()
+  layout.title.text = `arrowlabel._position = ${_position}`
+  layout.xaxis.title.text = '$x$'
+  layout.yaxis.title.text = '$y$'
+  layout._annotations.xaxis.arrowlabel._position = _position
+  layout._annotations.yaxis.arrowlabel._position = _position
+  plotjs.plot(x, y, style, layout)
+}
+
+plotjs.figure()
+layout.title.text = "Check of centering for 'after'"
+layout.xaxis.title.text = `-`
+layout.yaxis.title.text = `|`
+plotjs.plot(x, y, style, layout)
+
+x = [0, 8];
+y = [0, 8];
+for (let _position of ['inside', 'outside', 'after']) {
+  plotjs.figure()
+  layout.title.text = `arrowlabel._position = ${_position}`
+  layout.xaxis.title.text = 'x'
+  layout.yaxis.title.text = 'y'
+  layout._annotations.xaxis.arrowlabel._position = _position
+  layout._annotations.yaxis.arrowlabel._position = _position
+  plotjs.plot(x, y, style, layout)
+
+  plotjs.figure()
+  layout.title.text = `arrowlabel._position = ${_position}`
+  layout.xaxis.title.text = '$x$'
+  layout.yaxis.title.text = '$y$'
+  layout._annotations.xaxis.arrowlabel._position = _position
+  layout._annotations.yaxis.arrowlabel._position = _position
   plotjs.plot(x, y, style, layout)
 }
 

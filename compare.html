@@ -7,7 +7,7 @@
     id="MathJax-script"
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
   </script>
-  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.30.0.js"></script>
 	<script src="lib/plotjs.js"></script>
   <script src="lib/util.js"></script>
 	<script src="lib/config.js"></script>
@@ -19,6 +19,7 @@
     html, body {
       margin: 0px;
       padding-left: 3px;
+      /*background-color: #efe7dc;*/
     }
     div.plotly-notifier {
       visibility: hidden;
@@ -36,42 +37,57 @@
 </body>
 
 <script>
-let x = [0, 10];
-let y = [0, 100];
+let x = [0, 8];
+let y = [0, 8];
+x = [0, 10, 10];
+y = [0, 20, 0];
+//x = [0, 20];
+//y = [0, 20];
 const style = {
   type: 'scatter',
   mode: 'lines+markers',
   name: 'name1',
   showlegend: false,
   marker: {
-    color: 'black'
+    color: 'green'
   }
 };
 
-function setTitle(xaxis) {
-  layout.title.text = `_ticks = ${xaxis._ticks}, `
-  layout.title.text += `_ticklabelposition = ${xaxis._ticklabelposition}`
-}
+// Note that the zero line is clipped when the lower y range is between
+// [zerolinewidth, 0]. In this case, we draw the line by extending the
+// tail of the arrow. By default this is not done because the arrow is
+// an annotation and so it appears above the data. We also can't use a
+// regular data line because it will be clipped similar to the zero line.
+layout = plotjs.config.textbook.layout;
+config = plotjs.config.textbook.config;
+layout.title.font.size = 8
+layout.title.font.family = 'monospace'
 
-const layout = {
-  xaxis: {
-    title: {
-      text: 'x'
-    }
-  },
-  yaxis: {
-    title: {
-      text: 'y'
-    }
-  }
-}
+plotjs.figure()
+//Plotly.newPlot('figure0', [ { x: x, y: y, ...style } ], layout, config)
+//document.getElementById('figure0').style.display = ''
 
-layout.title = 'Plotly default'
+layout.yaxis.zeroline = true
+layout.yaxis.zerolinewidth = 1
+layout.yaxis.rangemode = "tozero"
+layout.xaxis.showticklabels = true
+layout.title.text = 'Plotly | rangemode="tozero", zerolinewidth=1'
 plotjs.plot(x, y, style, layout, { _usePlotlyOnly: true })
 
 plotjs.figure()
-layout.title = 'PlotJS default'
+layout._annotations.xaxis.arrow.arrowcolor = 'red'
+layout.title.text = 'PlotJS | rangemode="tozero", zerolinewidth=1'
 plotjs.plot(x, y, style, layout)
 
 
+plotjs.figure()
+optStr = 'rangemode="tozero", zerolinewidth=1'
+layout.yaxis.rangemode = "normal"
+layout.yaxis.range = [-1, 20]
+layout.title.text = 'Plotly | ' + optStr
+plotjs.plot(x, y, style, layout, { _usePlotlyOnly: true })
+
+plotjs.figure()
+layout.title.text = 'PlotJS | ' + optStr
+plotjs.plot(x, y, style, layout)
 </script>
