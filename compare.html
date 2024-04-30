@@ -40,7 +40,7 @@
 let x = [0, 8];
 let y = [0, 8];
 x = [0, 10, 10];
-y = [0, 20, 0];
+y = [-0.02, 20, 0];
 //x = [0, 20];
 //y = [0, 20];
 const style = {
@@ -54,7 +54,7 @@ const style = {
 };
 
 // Note that the zero line is clipped when the lower y range is between
-// [zerolinewidth, 0]. In this case, we draw the line by extending the
+// [-zerolinewidth, 0]. In this case, we draw the line by extending the
 // tail of the arrow. By default this is not done because the arrow is
 // an annotation and so it appears above the data. We also can't use a
 // regular data line because it will be clipped similar to the zero line.
